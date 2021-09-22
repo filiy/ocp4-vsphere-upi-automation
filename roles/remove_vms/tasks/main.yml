@@ -1,0 +1,31 @@
+  - name: Power off master VMs
+    vmware_guest:
+      hostname: "{{ vcenter.ip }}"
+      username: "{{ vcenter.service_account_username }}"
+      password: "{{ vcenter.service_account_password }}"
+      datacenter: "{{ vcenter.datacenter }}"
+      validate_certs: no
+      name: "{{ item.name }}"
+      state: poweredoff
+    loop: "{{ master_vms }}"
+
+  - name: Power off worker VMs
+    vmware_guest:
+      hostname: "{{ vcenter.ip }}"
+      username: "{{ vcenter.service_account_username }}"
+      password: "{{ vcenter.service_account_password }}"
+      datacenter: "{{ vcenter.datacenter }}"
+      validate_certs: no
+      name: "{{ item.name }}"
+      state: poweredoff
+    loop: "{{ worker_vms }}"
+
+  - name: Delete VM folder
+    vmware_guest:
+       hostname: "{{ vcenter.ip }}"
+       username: "{{ vcenter.service_account_username }}"
+       password: "{{ vcenter.service_account_password }}"
+       datacenter: "{{ vcenter.datacenter }}"
+       folder_name: ocp-bhjvf
+       validate_certs: no
+       state: absent

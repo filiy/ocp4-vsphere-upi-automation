@@ -1,44 +1,46 @@
-helper_vm_ip: 192.168.86.180
-bootstrap_ignition_url: "http://{{helper_vm_ip}}:8080/ignition/bootstrap.ign"
 config:
   provider: vsphere
-  base_domain: example.com
-  cluster_name: ocp4
+  version: 4.8.9
+  base_domain: rhtrva.internal
+  cluster_name: ocp
   fips: false
-  #networkType: OVNKubernetes
+  networkType: OVNKubernetes
   #isolationMode: Multitenant
-  installer_ssh_key: "{{ lookup('file', '~/.ssh/ocp4.pub') }}"
-  pull_secret: "{{ lookup('file', '~/pullsecret') }}"
+  installer_ssh_key: "{{ lookup('file', '/home/amelie/ocp/config/ocp4lab.pub') }}"
+  pull_secret: "{{ lookup('file', '/home/amelie/ocp/config/phil-pull-secret.txt') }}"
 vcenter:
-  ip: 192.168.86.100
+  ip: 192.168.10.5
   datastore: datastore1
-  network: VM Network
+  network_master: ocp4-master
+  network_worker: ocp4-worker
   service_account_username: administrator@vsphere.local
-  service_account_password: something
+  service_account_password: XXXX
   admin_username: administrator@vsphere.local
-  admin_password: something
-  datacenter: dc
+  admin_password: XXXX
+  datacenter: ric1
   folder_absolute_path:
   vm_power_state: poweredon
   template_name: rhcos-vmware
 download:
-  clients_url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest
+  clients_url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ config.version }}
   dependencies_url: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/latest/latest
   govc: https://github.com/vmware/govmomi/releases/download/v0.23.0/govc_linux_amd64.gz
 bootstrap_vms:
-  - { name: "bootstrap", macaddr: "00:50:56:a8:aa:a1", ipaddr: "192.168.86.181", cpu: 4, ram: 16384}
+  - { name: "bootstrap", ipaddr: "10.0.200.110", cpu: 4, ram: 16384, datastore: "datastore1"}
 master_vms:
-  - { name: "master0", macaddr: "00:50:56:a8:aa:a2", ipaddr: "192.168.86.182", cpu: 4, ram: 16384}
-  - { name: "master1", macaddr: "00:50:56:a8:aa:a3", ipaddr: "192.168.86.183", cpu: 4, ram: 16384}
-  - { name: "master2", macaddr: "00:50:56:a8:aa:a4", ipaddr: "192.168.86.184", cpu: 4, ram: 16384}
+  - { name: "master0", ipaddr: "10.0.200.100", cpu: 4, ram: 16384, datastore: "datastore1"}
+  - { name: "master1", ipaddr: "10.0.200.101", cpu: 4, ram: 16384, datastore: "datastore1"}
+  - { name: "master2", ipaddr: "10.0.200.102", cpu: 4, ram: 16384, datastore: "datastore1"}
 worker_vms:
-  - { name: "worker0", macaddr: "00:50:56:a8:aa:a5", ipaddr: "192.168.86.185", cpu: 4, ram: 16384}
-  - { name: "worker1", macaddr: "00:50:56:a8:aa:a6", ipaddr: "192.168.86.186", cpu: 4, ram: 16384}
-  - { name: "worker2", macaddr: "00:50:56:a8:aa:a7", ipaddr: "192.168.86.187", cpu: 4, ram: 16384}
+  - { name: "worker0", ipaddr: "10.0.100.100", cpu: 4, ram: 8192, datastore: "datastore1"}
+  - { name: "worker1", ipaddr: "10.0.100.101", cpu: 4, ram: 8192, datastore: "datastore1"}
+#  - { name: "worker2", ipaddr: "192.168.86.187", cpu: 4, ram: 16384}
 static_ip:
-  gateway: 192.168.86.1
-  netmask: 255.255.255.0
-  dns: "{{ helper_vm_ip }}"
+  gateway_master: 10.0.200.254
+  gateway_worker: 10.0.100.254
+  netmask_master: 255.255.255.0
+  netmask_worker: 255.255.255.0
+  dns: 192.168.10.23
   network_interface_name: ens192
 network_modifications:
   enabled: true
@@ -49,27 +51,6 @@ network_modifications:
   - cidr: 172.30.0.0/16
   machineNetwork:
   - cidr: 192.168.29.0/24
-proxy:
-  enabled: false
-  http_proxy: http://helper.ocp4.example.com:3129
-  https_proxy: http://helper.ocp4.example.com:3129
-  no_proxy: example.com
-  cert_content: |
-    -----BEGIN CERTIFICATE-----
-        <certficate content>
-    -----END CERTIFICATE-----
-registry:
-  enabled: false
-  product_repo: openshift-release-dev
-  product_release_name: ocp-release
-  product_release_version: 4.4.0-x86_64
-  username: ansible
-  password: ansible
-  email: user@awesome.org
-  cert_content:
-  host: registry.ocp4.example.com
-  port: 5000
-  repo: ocp4/openshift4
 ntp:
   custom: false
   ntp_server_list:

@@ -59,13 +59,13 @@
       disk:
       - size_gb: 120
         type: thin
-        datastore: "{{ vcenter.datastore }}"
+        datastore: "{{ item.datastore }}"
       hardware:
         memory_mb: "{{ item.ram }}"
         num_cpus: "{{ item.cpu }}"
         memory_reservation_lock: True
       networks:
-      - name: "{{ vcenter.network }}"
+      - name: "{{ vcenter.network_master }}"
         mac: "{{ item.macaddr | default(omit) }}"
       wait_for_ip_address: no
       customvalues:
@@ -74,7 +74,7 @@
         - key: guestinfo.ignition.config.data.encoding
           value: base64
         - key: guestinfo.afterburn.initrd.network-kargs
-          value: "ip={{ item.ipaddr }}::{{ static_ip.gateway }}:{{ static_ip.netmask }}:{{ item.name }}:ens192:off:{{ static_ip.dns }}"
+          value: "ip={{ item.ipaddr }}::{{ static_ip.gateway_master }}:{{ static_ip.netmask_master }}:{{ item.name }}:ens192:off:{{ static_ip.dns }}"
     loop: "{{ bootstrap_vms }}"
 
   - name: Create master VMs from ther template
@@ -91,13 +91,13 @@
       disk:
       - size_gb: 120
         type: thin
-        datastore: "{{ vcenter.datastore }}"
+        datastore: "{{ item.datastore }}"
       hardware:
         memory_mb: "{{ item.ram }}"
         num_cpus: "{{ item.cpu }}"
         memory_reservation_lock: True
       networks:
-      - name: "{{ vcenter.network }}"
+      - name: "{{ vcenter.network_master }}"
         mac: "{{ item.macaddr | default(omit) }}"
       wait_for_ip_address: no
       customvalues:
@@ -106,7 +106,7 @@
        - key: guestinfo.ignition.config.data.encoding
          value: base64
        - key: guestinfo.afterburn.initrd.network-kargs
-         value: "ip={{ item.ipaddr }}::{{ static_ip.gateway }}:{{ static_ip.netmask }}:{{ item.name }}:ens192:off:{{ static_ip.dns }}"
+         value: "ip={{ item.ipaddr }}::{{ static_ip.gateway_master }}:{{ static_ip.netmask_master }}:{{ item.name }}:ens192:off:{{ static_ip.dns }}"
     loop: "{{ master_vms }}"
 
   - name: Create worker VMs from the template
@@ -123,13 +123,13 @@
       disk:
       - size_gb: 120
         type: thin
-        datastore: "{{ vcenter.datastore }}"
+        datastore: "{{ item.datastore }}"
       hardware:
         memory_mb: "{{ item.ram }}"
         num_cpus: "{{ item.cpu }}"
         memory_reservation_lock: True
       networks:
-      - name: "{{ vcenter.network }}"
+      - name: "{{ vcenter.network_worker }}"
         mac: "{{ item.macaddr | default(omit) }}"
       wait_for_ip_address: no
       customvalues:
@@ -138,5 +138,5 @@
        - key: guestinfo.ignition.config.data.encoding
          value: base64
        - key: guestinfo.afterburn.initrd.network-kargs
-         value: "ip={{ item.ipaddr }}::{{ static_ip.gateway }}:{{ static_ip.netmask }}:{{ item.name }}:ens192:off:{{ static_ip.dns }}"
+         value: "ip={{ item.ipaddr }}::{{ static_ip.gateway_worker }}:{{ static_ip.netmask_worker }}:{{ item.name }}:ens192:off:{{ static_ip.dns }}"
     loop: "{{ worker_vms }}"
