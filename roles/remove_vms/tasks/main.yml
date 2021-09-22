@@ -1,4 +1,4 @@
-  - name: Power off master VMs
+  - name: Delete master VMs
     vmware_guest:
       hostname: "{{ vcenter.ip }}"
       username: "{{ vcenter.service_account_username }}"
@@ -6,10 +6,11 @@
       datacenter: "{{ vcenter.datacenter }}"
       validate_certs: no
       name: "{{ item.name }}"
-      state: poweredoff
+      state: absent
+      force: yes
     loop: "{{ master_vms }}"
 
-  - name: Power off worker VMs
+  - name: Delete worker VMs
     vmware_guest:
       hostname: "{{ vcenter.ip }}"
       username: "{{ vcenter.service_account_username }}"
@@ -17,8 +18,32 @@
       datacenter: "{{ vcenter.datacenter }}"
       validate_certs: no
       name: "{{ item.name }}"
-      state: poweredoff
+      state: absent
+      force: yes
     loop: "{{ worker_vms }}"
+
+  - name: Delete template VM
+    vmware_guest:
+      hostname: "{{ vcenter.ip }}"
+      username: "{{ vcenter.service_account_username }}"
+      password: "{{ vcenter.service_account_password }}"
+      datacenter: "{{ vcenter.datacenter }}"
+      validate_certs: no
+      name: "{{ vcenter.template_name }}"
+      state: absent
+      force: yes
+
+    - name: Get Cluster infraID
+      command: jq -r .infraID "{{ playbook_dir }}/install-dir/metadata.json"
+      register: infraID
+
+    - name: Set the vcenter.infraID fact
+      set_fact:
+        vcenter_folder: "{{ infraID.stdout }}"
+
+    - name: Set the vcenter.folder_absolute_path if not provided
+      set_fact:
+        vcenter: "{{ vcenter | combine({'folder_absolute_path': '/'+datacenter+'/vm/'+vcenter_folder}, recursive=True) }}"
 
   - name: Delete VM folder
     vmware_guest:
@@ -26,6 +51,6 @@
        username: "{{ vcenter.service_account_username }}"
        password: "{{ vcenter.service_account_password }}"
        datacenter: "{{ vcenter.datacenter }}"
-       folder_name: ocp-bhjvf
-       validate_certs: no
+       folder_name: "{{ vcenter.folder_absolute_path }}"
+       validate_certs: no 
        state: absent
