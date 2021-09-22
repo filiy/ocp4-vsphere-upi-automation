@@ -16,7 +16,7 @@
       name: '{{ vcenter.template_name }}'
       allow_duplicates: False
       disk_provisioning: thin
-      networks: "{u'VM Network':u'{{ vcenter.network }}'}"
+      networks: "{u'VM Network':u'{{ vcenter.network_master }}'}"
       ova: "{{ playbook_dir }}/downloads/{{ vcenter.template_name }}.ova"
       power_on: False
       validate_certs: False

@@ -56,3 +56,12 @@ ntp:
   ntp_server_list:
     - 0.rhel.pool.ntp.org
     - 1.rhel.pool.ntp.org
+proxy:
+  enabled: false
+  http_proxy: http://helper.ocp4.example.com:3129
+  https_proxy: http://helper.ocp4.example.com:3129
+  no_proxy: example.com
+  cert_content: |
+    -----BEGIN CERTIFICATE-----
+        <certficate content>
+    -----END CERTIFICATE-----
