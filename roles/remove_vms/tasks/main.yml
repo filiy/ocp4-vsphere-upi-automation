@@ -41,10 +41,6 @@
     set_fact:
       vcenter_folder: "{{ infraID.stdout }}"
 
-  - name: Set the vcenter.folder_absolute_path if not provided
-    set_fact:
-      vcenter: "{{ vcenter | combine({'folder_absolute_path': '/'+datacenter+'/vm/'+vcenter_folder}, recursive=True) }}"
-
   - name: Delete VM folder
     vcenter_folder:
        hostname: "{{ vcenter.ip }}"
