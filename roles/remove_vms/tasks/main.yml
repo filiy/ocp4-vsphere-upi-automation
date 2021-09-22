@@ -33,17 +33,17 @@
       state: absent
       force: yes
 
-    - name: Get Cluster infraID
-      command: jq -r .infraID "{{ playbook_dir }}/install-dir/metadata.json"
-      register: infraID
+  - name: Get Cluster infraID
+    command: jq -r .infraID "{{ playbook_dir }}/install-dir/metadata.json"
+    register: infraID
 
-    - name: Set the vcenter.infraID fact
-      set_fact:
-        vcenter_folder: "{{ infraID.stdout }}"
+  - name: Set the vcenter.infraID fact
+    set_fact:
+      vcenter_folder: "{{ infraID.stdout }}"
 
-    - name: Set the vcenter.folder_absolute_path if not provided
-      set_fact:
-        vcenter: "{{ vcenter | combine({'folder_absolute_path': '/'+datacenter+'/vm/'+vcenter_folder}, recursive=True) }}"
+  - name: Set the vcenter.folder_absolute_path if not provided
+    set_fact:
+      vcenter: "{{ vcenter | combine({'folder_absolute_path': '/'+datacenter+'/vm/'+vcenter_folder}, recursive=True) }}"
 
   - name: Delete VM folder
     vmware_guest:
